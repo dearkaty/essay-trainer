@@ -33,7 +33,7 @@ body {
   margin: 0;
   padding: 0;
   position: relative;
-  min-width: 1200px;
+  min-width: 100%;
   overflow-x: auto;
   display: flex;
   flex-direction: column;
@@ -133,13 +133,14 @@ body {
    Layout Containers & Grids
    ========================================== */
 .container {
-  width: 1240px;
+  width: 100%; 
   max-width: 1240px;
   margin: 0 auto;
   padding-top: 156px;
-  padding-left: 0;
-  padding-right: 0;
+  padding-left: 20px;
+  padding-right: 20px;
   flex: 1 0 auto;
+  box-sizing: border-box;
 }
 
 .workspace-grid {
