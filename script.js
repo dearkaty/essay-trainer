@@ -243,7 +243,7 @@ function saveApiKey() {
 async function translateGoogle() {
   const inputElem = document.getElementById('transInput');
   const warningElem = document.getElementById('transWarning');
-  const text = inputElem.value.trim();
+  const text = inputElem ? inputElem.value.trim() : '';
 
   if (!text) return;
 
@@ -268,12 +268,12 @@ async function translateGoogle() {
   }
 
   try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=autodetect|${targetLang}`;
     const response = await fetch(url);
     const data = await response.json();
 
-    if (data && data[0] && data[0][0]) {
-      const translatedText = data[0][0][0];
+    if (data && data.responseData && data.responseData.translatedText) {
+      const translatedText = data.responseData.translatedText;
 
       if (text.toLowerCase() === translatedText.toLowerCase()) {
         if (warningElem) {
@@ -283,14 +283,15 @@ async function translateGoogle() {
         return;
       }
 
-      // Если всё отлично — добавляем в историю
       if (warningElem) warningElem.style.display = 'none';
       translationHistory.push(`${text} → ${translatedText}`);
       renderHistory();
       inputElem.value = '';
+    } else {
+      throw new Error("Invalid response format");
     }
   } catch (error) {
-    alert("Translation failed. Please check network connection.");
+    alert("Translation failed. Please check your connection or try again.");
   }
 }
 
