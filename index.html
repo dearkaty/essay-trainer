@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Essay trainer</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Intel+One+Mono:ital,wght@0,400;0,700;1,400&family=Miss+Fajardose&display=swap" rel="stylesheet">
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Decorative SVG Lace -->
+  <div class="lace-border"></div>
+
+  <!-- Header: Streak counter & Settings trigger -->
+  <header class="header">
+    <div class="strike">
+       <strong>strike:</strong> <span id="strikeCount">0</span> days
+    </div>
+    
+    <button class="history-link history-btn" id="btn-history">settings</button>
+  </header>
+
+  <!-- Main Content Container -->
+  <div class="container">
+    <main class="workspace-grid">
+      
+      <!-- Left Column: Task Info -->
+      <aside class="sidebar-left">
+        <button class="btn btn-primary" onclick="generateTask()">NEW THEME</button>
+        
+        <div class="card info-card">
+          <div class="info-row" id="rowLang" style="display: none;">
+            <span class="label">LANGUAGE:</span>
+            <span class="value" id="dispLang"></span>
+            <div class="info-spacer"></div>
+          </div>
+
+          <div class="info-row" id="rowLength" style="display: none;">
+            <span class="label">WORD COUNT:</span>
+            <span class="value" id="dispLength"></span>
+            <div class="info-spacer"></div>
+          </div>
+
+          <div class="info-row">
+            <span class="label" id="labelTopic" style="display: none;">TOPIC:</span>
+            <span class="value placeholder-text" id="dispTopic">Click 'NEW THEME' to get a topic...</span>
+            <div class="info-spacer"></div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center Column: Main Workspace Notebook -->
+      <section class="main-content">
+        <div class="notebook-wrapper">
+          <img src="Main_card.svg" class="notebook-bg-img" alt="Notebook background">
+          
+          <textarea class="notebook-paper" id="essayInput" placeholder="Start typing your essay here..." oninput="updateCounter()">Hey, I'm happy to see you here! For the best experience, I recommend using the desktop version.
+
+Here you can practice writing essays in German, English, and French. Write daily to build up your streak!
+
+How it works:
+• Click 'NEW THEME' to get a topic, target language, and word count.
+• In Settings, you can view your task history or enable AI evaluation. The AI toggle stays OFF by default and resets on refresh, so the app can work fully without AI.
+• Need help with a word? Use the translator on the right.
+• You can also save your current essay, corrections, and translated words as a .txt file.
+
+Good luck and happy writing!</textarea>
+          <div class="word-counter">words: <span id="wordCount">0</span></div>
+        </div>
+
+        <div id="wordLimitAlert" class="word-alert"></div>
+
+        <div class="action-buttons">
+          <button class="btn btn-secondary" onclick="checkEssay()">CHECK THE ESSAY</button>
+          <button class="btn btn-outline" onclick="saveToFile()">SAVE .TXT</button>
+        </div>
+      </section>
+
+      <!-- Right Column: Translation Assistant -->
+      <aside class="sidebar-right">
+        <h2 class="section-title translation-title">Need some help with<br>the translation?</h2>
+        
+        <div class="translate-box">
+          <textarea class="input-field translate-input" id="transInput" placeholder="Enter a word or phrase..."></textarea>
+        </div>
+        <div id="transWarning" class="trans-warning">Maximum 5 translations allowed!</div>
+
+        <button class="btn btn-primary btn-translate" onclick="translateGoogle()">TRANSLATE</button>
+
+        <div class="card history-card">
+          <h3 class="history-title">RECENT TRANSLATIONS<br>(<span id="transCount">0</span> / 5):</h3>
+          <ul id="historyList" class="history-list">
+            <li class="history-empty">No history yet...</li>
+          </ul>
+        </div>
+      </aside>
+
+    </main>
+
+    <!-- Feedback Evaluation Results Section -->
+    <section class="result-section" id="resultSection" style="display: none;">
+      <div class="card result-card">
+        <h2 class="result-title">Corrected version:</h2>
+        <div id="feedbackContainer"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    created by ptpnko
+  </footer>
+
+  <!-- Settings & Task History Modal -->
+  <div id="settingsModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button class="btn-close" onclick="toggleModal(false)">✕</button>
+      </div>
+      
+      <div class="settings-body">
+        <!-- AI Toggle Switch -->
+        <div class="setting-item">
+          <label class="toggle-label" for="aiToggle">
+            <span>Use Gemini AI for Evaluation</span>
+            <div class="switch">
+              <input type="checkbox" id="aiToggle" onchange="toggleAiSettings()">
+              <span class="slider round"></span>
+            </div>
+          </label>
+        </div>
+
+        <!-- API Key Input Field -->
+        <div id="aiKeyGroup" class="key-group" style="display: none;">
+          <label for="apiKeyInput" class="key-label">
+            Gemini API Key 
+            <span class="tooltip-icon" data-tooltip="Get a free key at aistudio.google.com (Sign in -> Get API key -> Create API key)">?</span>
+          </label>
+          <input type="password" id="apiKeyInput" placeholder="Your Key..." onchange="saveApiKey()" />
+        </div>
+
+        <hr class="modal-divider" />
+
+        <!-- History of Generated Tasks -->
+        <h3>Task history</h3>
+        <ul id="taskHistoryList" class="history-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll to top floating action button -->
+  <button class="scroll-top-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
+
+  <!-- External JS Script -->
+  <script src="script.js"></script>
+</body>
+</html>
